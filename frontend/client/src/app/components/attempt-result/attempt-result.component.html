@@ -1,0 +1,7 @@
+<div *ngIf="attempt">
+  <h2>Exam Result</h2>
+  <p>Exam: {{ getExamTitle() }}</p>
+  <p>Score: {{ attempt.score }} / {{ getQuestionsCount() }}</p>
+  <p>Status: {{ attempt.status }}</p>
+  <a routerLink="/student/dashboard">Back to Dashboard</a>
+</div>

@@ -1,0 +1,13 @@
+<div *ngIf="attempt">
+  <div>Time Remaining: {{ time }}</div>
+  <div *ngFor="let aq of attempt.assignedQuestions; let i = index">
+    <h4>Question {{ i + 1 }}: {{ aq.question?.text || aq.question }}</h4>
+    <div *ngFor="let opt of aq.question?.options; let j = index">
+      <label>
+        <input type="radio" [name]="'q' + i" (change)="selectOption(i, j)" />
+        {{ opt }}
+      </label>
+    </div>
+  </div>
+  <button (click)="submit()">Submit Exam</button>
+</div>

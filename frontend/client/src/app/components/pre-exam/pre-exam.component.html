@@ -1,0 +1,6 @@
+<div *ngIf="exam">
+  <h2>{{ exam.title }}</h2>
+  <p>{{ exam.description }}</p>
+  <p>Duration: {{ exam.durationInMinutes }} minutes</p>
+  <button (click)="startExam()">Start Exam</button>
+</div>

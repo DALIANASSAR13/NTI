@@ -1,0 +1,11 @@
+<div>
+  <h2>Attempt History</h2>
+  <div *ngIf="attempts.length === 0">No attempts found.</div>
+  <table *ngIf="attempts.length > 0">
+    <tr *ngFor="let a of attempts">
+      <td>{{ getExamTitle(a) }}</td>
+      <td>{{ a.status }}</td>
+      <td><button (click)="viewResult(a._id)">View Result</button></td>
+    </tr>
+  </table>
+</div>

@@ -1,0 +1,11 @@
+<div class="container">
+  <h2>Available Exams</h2>
+  <div *ngIf="exams.length === 0" class="text-center text-muted">No exams available.</div>
+  <div *ngFor="let exam of exams" class="card">
+    <h3>{{ exam.title }}</h3>
+    <p>{{ exam.description }}</p>
+    <p><strong>Level:</strong> {{ exam.level }} | <strong>Specialization:</strong> {{ exam.specialization }}</p>
+    <p><strong>Duration:</strong> {{ exam.durationInMinutes }} min</p>
+    <button class="btn btn-primary" (click)="viewExam(exam)">View Details</button>
+  </div>
+</div>
