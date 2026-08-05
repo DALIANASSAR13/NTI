@@ -1,0 +1,56 @@
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-title">
+      <p class="eyebrow">Welcome back</p>
+      <h2>My Dashboard</h2>
+      <p class="subtitle">Your exam progress, and everything upcoming or completed, in one place.</p>
+    </div>
+
+    @if (overview(); as stats) {
+      <div class="seals">
+        <app-stat-seal [value]="stats.averageScorePercentage + '%'" label="your average score" color="#2f9e6e" />
+        <app-stat-seal [value]="stats.completedExamsCount" label="exams completed" />
+      </div>
+    }
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Your exams</h3>
+      <p class="sub">Upcoming and recently completed</p>
+      <div class="exam-list">
+        @for (exam of exams(); track exam.id) {
+          <div class="exam-row">
+            <div class="info">
+              <b>{{ exam.title }}</b>
+              @if (exam.status === 'upcoming') {
+                <span>
+                  {{ exam.scheduledAt | date: 'EEE, MMM d' }}
+                  @if (exam.durationMinutes) { · {{ exam.durationMinutes }} min }
+                </span>
+              } @else {
+                <span>Completed</span>
+              }
+            </div>
+
+            @if (exam.status === 'upcoming') {
+              <span class="status-tag tag-upcoming">Upcoming</span>
+            } @else {
+              <span class="status-tag tag-done">{{ exam.scorePercentage }}%</span>
+            }
+          </div>
+        } @empty {
+          <p class="empty">No exams yet.</p>
+        }
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Your progress over time</h3>
+      <p class="sub">Scores across your recent exams</p>
+      <div class="chart-box">
+        <canvas baseChart [type]="'line'" [data]="progressChartData()" [options]="lineOptions"></canvas>
+      </div>
+    </div>
+  </div>
+</div>

@@ -34,6 +34,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/attempts', attemptRoutes);
+app.use('/api/teacher', require('./routes/teacherRoutes'));
+app.use('/api/student', require('./routes/studentRoutes'));
 
 // 404 Handler
 app.all('/{*splat}', (req, res) => {
@@ -48,6 +50,9 @@ app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
+
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const startServer = async () => {
   await connectDB();

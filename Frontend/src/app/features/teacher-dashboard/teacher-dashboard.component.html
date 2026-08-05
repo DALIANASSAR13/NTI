@@ -1,0 +1,91 @@
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-title">
+      <p class="eyebrow">Overview</p>
+      <h2>Teacher Dashboard</h2>
+      <p class="subtitle">A summary of how your students are performing across your exams.</p>
+    </div>
+
+    @if (overview(); as stats) {
+      <div class="seals">
+        <app-stat-seal [value]="stats.totalExamsCreated" label="exams created" />
+        <app-stat-seal [value]="stats.totalStudentsAttempted" label="students attempted" color="#c89b3c" />
+        <app-stat-seal [value]="stats.averageScorePercentage + '%'" label="average score" color="#2f9e6e" />
+      </div>
+    }
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>Pass / Fail rate</h3>
+      <p class="sub">{{ selectedExamTitle() }}</p>
+      <div class="chart-box">
+        <canvas baseChart [type]="'doughnut'" [data]="passFailChartData()" [options]="doughnutOptions"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Score distribution</h3>
+      <p class="sub">Number of students per score band</p>
+      <div class="chart-box">
+        <canvas baseChart [type]="'bar'" [data]="scoreDistributionChartData()" [options]="barOptions"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-head">
+      <h3>Student attempts</h3>
+      <div class="controls">
+        <select [ngModel]="selectedExamId()" (ngModelChange)="onExamChange($event)">
+          @for (exam of exams(); track exam.id) {
+            <option [value]="exam.id">{{ exam.title }}</option>
+          }
+        </select>
+
+        <input
+          type="text"
+          placeholder="Search by student name..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+        />
+
+        <button class="btn btn-excel" (click)="exportExcel()">⬇ Excel</button>
+        <button class="btn btn-pdf" (click)="exportPdf()">⬇ PDF</button>
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th (click)="onSort('studentName')">Student <span class="arrow">{{ sortArrow('studentName') }}</span></th>
+          <th (click)="onSort('scorePercentage')">Score <span class="arrow">{{ sortArrow('scorePercentage') }}</span></th>
+          <th (click)="onSort('grade')">Grade <span class="arrow">{{ sortArrow('grade') }}</span></th>
+          <th (click)="onSort('submittedAt')">Date <span class="arrow">{{ sortArrow('submittedAt') }}</span></th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (isLoadingAttempts()) {
+          <tr><td colspan="5" class="empty">Loading…</td></tr>
+        } @else {
+          @for (attempt of visibleAttempts(); track attempt.id) {
+            <tr>
+              <td>{{ attempt.studentName }}</td>
+              <td class="mono">{{ attempt.scorePercentage }}</td>
+              <td>{{ attempt.grade }}</td>
+              <td class="mono">{{ attempt.submittedAt | date: 'mediumDate' }}</td>
+              <td>
+                <span class="pill" [class.pill-pass]="attempt.status === 'passed'" [class.pill-fail]="attempt.status === 'failed'">
+                  {{ attempt.status === 'passed' ? '✓ Passed' : '✕ Failed' }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" class="empty">No matching attempts.</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
