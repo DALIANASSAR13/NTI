@@ -34,8 +34,10 @@ app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/attempts', attemptRoutes);
+ HEAD
 app.use('/api/teacher', require('./routes/teacherRoutes'));
 app.use('/api/student', require('./routes/studentRoutes'));
+cb28f51b8ca2bf1a2f562cbdce538534dd2c1de9
 
 // 404 Handler
 app.all('/{*splat}', (req, res) => {
@@ -50,8 +52,10 @@ app.use(errorHandler);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
+ HEAD
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
+ cb28f51b8ca2bf1a2f562cbdce538534dd2c1de9
 
 const startServer = async () => {
   await connectDB();
