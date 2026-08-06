@@ -21,4 +21,10 @@ router.post('/register', authLimiter, validateRegister, authController.register)
 
 router.post('/login', authLimiter, validateLogin, authController.login);
 
+const auth = require('../middleware/auth');
+
+router.get('/specializations', authController.getSpecializations);
+
+router.get('/me', auth, authController.getMe);
+
 module.exports = router;

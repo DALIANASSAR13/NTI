@@ -1,0 +1,188 @@
+<!-- Toast Notification -->
+@if (toastMessage) {
+  <div class="toast toast--error">
+    <div class="toast__icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+}
+
+<div class="form-page">
+  <header class="form-header">
+    <div class="form-header__left">
+      <button class="icon-btn icon-btn--back" (click)="goBack()" title="Back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div>
+        <h1 class="form-header__title">Create New Exam</h1>
+        <p class="form-header__subtitle">Define the exam schedule and add questions to the pool.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="card" id="exam-details-card" style="background:white; border-radius:12px; border:1px solid #e9ecef; padding:2rem; margin-bottom:2rem;" [class.question-block--error]="examDetailsError">
+    <h2 style="margin-top:0;">Exam Details</h2>
+    @if (examDetailsError) { <div class="error-text" style="color:#ff6b6b; font-size:0.9rem; margin-bottom:1rem; font-weight:600;">{{ examDetailsError }}</div> }
+    
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" class="form-control" [(ngModel)]="examData.title" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Specialization</label>
+        <input type="text" class="form-control" [(ngModel)]="examData.specialization" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Level (1-4)</label>
+        <input type="number" class="form-control" [(ngModel)]="examData.level" min="1" max="4" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duration (mins)</label>
+        <input type="number" class="form-control" [(ngModel)]="examData.durationInMinutes" min="1" max="300" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Available From</label>
+        <input type="datetime-local" class="form-control" [(ngModel)]="examData.availableFrom" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Available To</label>
+        <input type="datetime-local" class="form-control" [(ngModel)]="examData.availableTo" (ngModelChange)="examDetailsError=''">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Questions To Ask</label>
+        <input type="number" class="form-control" [(ngModel)]="examData.questionsToAsk" min="1" (ngModelChange)="examDetailsError=''">
+      </div>
+    </div>
+  </div>
+
+  <div class="questions-list">
+    <h2>Question Pool</h2>
+    @for (q of questions; track q.id; let i = $index) {
+      <div class="question-block" [id]="'question-' + i" [class.question-block--error]="!!q.error">
+        <div class="question-block__header">
+          <div class="question-block__title">
+            <span class="question-block__number">{{ i + 1 }}</span>
+            <h3>Question</h3>
+          </div>
+          @if (questions.length > 1) {
+            <button class="icon-btn icon-btn--danger" (click)="removeQuestion(q.id)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+            </button>
+          }
+        </div>
+
+        @if (q.error) { 
+          <div class="question-block__error-banner" style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; padding: 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-weight:600;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;">
+              <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/>
+            </svg>
+            {{ q.error }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label">Question Text</label>
+          <textarea class="form-control form-control--textarea" [(ngModel)]="q.text" (ngModelChange)="q.error=''"></textarea>
+        </div>
+
+        <div class="options-section">
+          <label class="form-label">Options </label>
+          <div class="options-list">
+            @for (opt of q.options; track $index; let j = $index) {
+              <div class="option-row" [class.option-row--correct]="q.correctAnswer === opt && opt !== ''">
+                <button class="radio-custom" [class.active]="q.correctAnswer === opt && opt !== ''" (click)="opt ? setCorrectAnswer(q.id, opt) : null">
+                  @if (q.correctAnswer === opt && opt !== '') {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  }
+                </button>
+                <div style="flex:1;">
+                  <input type="text" class="form-control" [ngModel]="opt" (ngModelChange)="updateOptionValue(q.id, j, $event); q.error = ''" placeholder="Option {{ j + 1 }}">
+                </div>
+                @if (q.options.length > 2) {
+                  <button class="icon-btn icon-btn--danger-ghost" style="width:36px;height:36px;background:transparent;border:none;color:#868e96;cursor:pointer;" (click)="removeOption(q.id, j)" title="Remove option">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          @if (q.options.length < 6) {
+            <button class="btn-text" (click)="addOption(q.id)">+ Add Option</button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="form-actions-bottom">
+    <button class="btn btn--outline" (click)="addQuestion()">+ Add New Question</button>
+    <button class="btn btn--outline" (click)="importFromBank()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;margin-right:0.5rem;display:inline-block;vertical-align:middle;">
+        <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Import From Bank
+    </button>
+    <div style="flex:1;"></div>
+    <button class="btn btn--primary" (click)="submitExam()" [disabled]="isSubmitting">
+      @if (isSubmitting) {
+        <span class="btn-spinner"></span> Creating Exam...
+      } @else {
+        Create Exam
+      }
+    </button>
+  </div>
+  
+  <!-- Full Page Loading Overlay for smooth UX -->
+  @if (isSubmitting) {
+    <div class="modal-overlay" style="z-index:9999; flex-direction:column; gap:1rem;">
+      <div class="loading-spinner">
+        <div class="loading-spinner__ring"></div>
+        <div class="loading-spinner__ring"></div>
+      </div>
+      <h3 style="color:white; margin:0;">Saving Questions & Exam...</h3>
+    </div>
+  }
+
+  <!-- Import From Bank Modal -->
+  @if (showImportModal) {
+    <div class="modal-overlay" style="z-index:9999;">
+      <div class="card" style="background:white; padding:2rem; border-radius:12px; width:600px; max-width:90%; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h2 style="margin-top:0; border-bottom:1px solid #e9ecef; padding-bottom:1rem;">Import from Question Bank</h2>
+        
+        <div style="overflow-y:auto; flex:1; margin:1rem 0; padding-right:0.5rem; display:flex; flex-direction:column; gap:0.75rem;">
+          @for (bq of bankQuestions; track bq._id) {
+            <label style="display:flex; gap:1rem; align-items:flex-start; padding:1rem; border:1px solid #e9ecef; border-radius:8px; cursor:pointer; transition:all 0.2s;" 
+                   [style.background]="selectedBankQuestions.has(bq._id) ? '#f8f9fa' : 'white'"
+                   [style.border-color]="selectedBankQuestions.has(bq._id) ? '#339af0' : '#e9ecef'">
+              <input type="checkbox" 
+                     [checked]="selectedBankQuestions.has(bq._id)" 
+                     (change)="toggleBankSelection(bq._id)"
+                     style="margin-top:0.25rem; cursor:pointer;">
+              <div>
+                <div style="font-weight:600; margin-bottom:0.25rem; color:#495057;">{{ bq.text }}</div>
+                <div style="font-size:0.85rem; color:#868e96;">{{ bq.options.length }} options</div>
+              </div>
+            </label>
+          }
+          @if (bankQuestions.length === 0) {
+            <p style="text-align:center; color:#868e96;">No existing questions found in your bank.</p>
+          }
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:1rem; border-top:1px solid #e9ecef; padding-top:1rem;">
+          <button class="btn btn--outline" (click)="showImportModal = false">Cancel</button>
+          <button class="btn btn--primary" (click)="confirmImport()" [disabled]="selectedBankQuestions.size === 0">
+            Import Selected ({{ selectedBankQuestions.size }})
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

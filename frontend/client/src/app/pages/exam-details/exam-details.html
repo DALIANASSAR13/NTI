@@ -1,0 +1,177 @@
+<div class="dashboard">
+  <header class="dashboard__header" style="align-items: center; margin-bottom: 2rem;">
+    <div class="dashboard__title-block" style="display:flex; align-items:center; gap:1rem;">
+      <button class="icon-btn" (click)="goBack()" title="Back to Exams" style="background: white; border: 1px solid #e9ecef; border-radius: 8px; width: 40px; height: 40px; padding: 8px; cursor: pointer; display:flex; align-items:center; justify-content:center; color: #343a40;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m12 19-7-7 7-7"/>
+          <path d="M19 12H5"/>
+        </svg>
+      </button>
+      <div>
+        <h1 class="dashboard__title">{{ exam?.title || 'Exam Details' }}</h1>
+        <p class="dashboard__subtitle">Specialization: {{ exam?.specialization }} | Level {{ exam?.level }}</p>
+      </div>
+    </div>
+  </header>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="loading-spinner"><div class="loading-spinner__ring"></div><div class="loading-spinner__ring"></div></div>
+      <p>Loading exam details...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <p style="color:red; font-weight:bold;">{{ error }}</p>
+      <button class="btn btn--outline" (click)="loadExam()">Try Again</button>
+    </div>
+  } @else {
+    
+    <div class="tabs" style="display:flex; gap:1rem; margin-bottom:2rem; border-bottom: 2px solid #e9ecef;">
+      <button class="tab-btn" [class.active]="activeTab === 'questions'" (click)="activeTab = 'questions'">Questions & Schedule</button>
+      <button class="tab-btn" [class.active]="activeTab === 'participation'" (click)="activeTab = 'participation'">Participation & Grading</button>
+    </div>
+
+    @if (activeTab === 'questions') {
+      <div class="card" style="background:white; border-radius:12px; border:1px solid #e9ecef; padding:2rem; margin-bottom:2rem;">
+        <h2 style="margin-top:0;">Schedule & Settings</h2>
+        
+        @if (hasAttempts) {
+          <div style="background:rgba(255,107,107,0.1); color:#ff6b6b; padding:1rem; border-radius:8px; margin-bottom:1.5rem; display:flex; align-items:center; gap:0.5rem; font-size:0.9rem; font-weight:600;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Students have already started this exam. You can only extend the end date (availableTo).
+          </div>
+        }
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+          <div>
+            <label style="display:block; font-weight:600; margin-bottom:0.5rem; font-size:0.9rem;">Available From</label>
+            <input type="datetime-local" class="form-control" [ngModel]="editForm.availableFrom" (ngModelChange)="updateForm('availableFrom', $event)" [disabled]="hasAttempts" style="width:100%; padding:0.6rem; border:1px solid #e9ecef; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; margin-bottom:0.5rem; font-size:0.9rem;">Available To</label>
+            <input type="datetime-local" class="form-control" [ngModel]="editForm.availableTo" (ngModelChange)="updateForm('availableTo', $event)" style="width:100%; padding:0.6rem; border:1px solid #e9ecef; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; margin-bottom:0.5rem; font-size:0.9rem;">Duration (minutes)</label>
+            <input type="number" class="form-control" [ngModel]="editForm.durationInMinutes" (ngModelChange)="updateForm('durationInMinutes', $event)" [disabled]="hasAttempts" style="width:100%; padding:0.6rem; border:1px solid #e9ecef; border-radius:6px;">
+          </div>
+          <div>
+            <label style="display:block; font-weight:600; margin-bottom:0.5rem; font-size:0.9rem;">Questions to Ask</label>
+            <input type="number" class="form-control" [ngModel]="editForm.questionsToAsk" (ngModelChange)="updateForm('questionsToAsk', $event)" [disabled]="hasAttempts" style="width:100%; padding:0.6rem; border:1px solid #e9ecef; border-radius:6px;">
+          </div>
+        </div>
+
+        <div style="margin-top:2rem; display:flex; justify-content:flex-end; gap:1rem;">
+          <button class="btn btn--primary" style="box-shadow: 0 4px 12px rgba(51, 154, 240, 0.3); padding: 0.75rem 1.5rem; font-size: 1rem; transition: transform 0.2s;" (click)="saveSchedule()" [disabled]="isSaving" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;margin-right:0.5rem;display:inline-block;vertical-align:text-bottom;"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            {{ isSaving ? 'Saving...' : 'Save Settings' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="questions-list">
+        <h2 style="margin-top:0;">Question Pool</h2>
+        <p style="color:#868e96; font-size:0.9rem; margin-bottom:1.5rem;">Below are all the questions associated with this exam. You can edit them inline and save changes.</p>
+        @for (q of exam?.questionPool; track q._id; let i = $index) {
+          <div class="question-block" style="background:white; border-radius:12px; border:1px solid #e9ecef; padding:2rem; margin-bottom:1.5rem;">
+            <div style="font-weight:bold; color:#339af0; margin-bottom:1rem;">Question {{ i + 1 }}</div>
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label class="form-label" style="display:block; font-weight:600; font-size:0.9rem; margin-bottom:0.5rem;">Question Text</label>
+              <textarea class="form-control" [(ngModel)]="q.text" style="width:100%; padding:0.8rem; border:1px solid #e9ecef; border-radius:8px; resize:vertical; min-height:80px;"></textarea>
+            </div>
+            
+            <div>
+              <label class="form-label" style="display:block; font-weight:600; font-size:0.9rem; margin-bottom:0.5rem;">Options</label>
+              <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                @for (opt of q.options; track $index; let idx = $index) {
+                  <div style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem; border:1px solid #e9ecef; border-radius:6px; background:#f8f9fa;">
+                    <div style="width:20px; height:20px; border-radius:50%; border:2px solid #ced4da; display:flex; align-items:center; justify-content:center; cursor: pointer;" 
+                         [style.border-color]="q.correctAnswer === q.options[idx] ? '#20c997' : '#ced4da'" 
+                         [style.background]="q.correctAnswer === q.options[idx] ? '#20c997' : 'transparent'"
+                         (click)="q.correctAnswer = q.options[idx]" title="Set as correct answer">
+                      @if (q.correctAnswer === q.options[idx]) {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" style="width:12px;height:12px;"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                      }
+                    </div>
+                    <input type="text" [ngModel]="q.options[idx]" (ngModelChange)="onOptionChange(q, idx, $event, q.options[idx])" class="form-control" style="flex-grow:1; border:1px solid #dee2e6; border-radius:4px; padding:0.4rem 0.75rem; font-size:0.95rem; color:#495057;">
+                    <button class="icon-btn" style="color:#ff6b6b; background:transparent; border:none; cursor:pointer;" (click)="removeOption(q, idx)" title="Remove Option">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+              <button class="btn btn--outline" style="margin-top:1rem; font-size:0.85rem; padding:0.5rem 1rem; border:1px dashed #ced4da; background:transparent; cursor:pointer; color:#495057; border-radius:6px;" (click)="addOption(q)">+ Add Option</button>
+            </div>
+
+            <div style="margin-top:1.5rem; text-align:right;">
+              <button class="btn btn--primary" style="box-shadow: 0 4px 12px rgba(51, 154, 240, 0.3); padding: 0.5rem 1.5rem; border:none; border-radius:6px; background:#339af0; color:white; cursor:pointer; font-weight:600;" (click)="saveQuestion(q)" [disabled]="savingQuestions[q._id]">
+                {{ savingQuestions[q._id] ? 'Saving...' : 'Save Question' }}
+              </button>
+              @if (savedMessage[q._id]) {
+                <span style="color:#20c997; font-size:0.9rem; margin-left:1rem; font-weight:600;">Saved!</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab === 'participation') {
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+        
+        <!-- TAKEN -->
+        <div class="card" style="background:white; border-radius:12px; border:1px solid #e9ecef; padding:2rem;">
+          <h2 style="margin-top:0; color:#20c997; display:flex; align-items:center; gap:0.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Taken Exam
+          </h2>
+          @if (stats?.taken?.length === 0) {
+            <p style="color:#868e96; font-size:0.9rem;">No students have taken this exam yet.</p>
+          } @else {
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-top:1.5rem;">
+              @for (t of stats?.taken; track t.student._id) {
+                <div style="padding:1rem; border:1px solid #e9ecef; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                  <div>
+                    <div style="font-weight:600;">{{ t.student.name }}</div>
+                    <div style="font-size:0.85rem; color:#868e96;">{{ t.student.email }}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:1.2rem; font-weight:bold; color: #339af0;">
+                      {{ t.status === 'completed' ? (t.score + '%') : 'In Progress' }}
+                    </div>
+                    <div style="font-size:0.75rem; color:#868e96;">Started: {{ t.startTime | date:'short' }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- NOT TAKEN -->
+        <div class="card" style="background:white; border-radius:12px; border:1px solid #e9ecef; padding:2rem;">
+          <h2 style="margin-top:0; color:#ff6b6b; display:flex; align-items:center; gap:0.5rem;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01" stroke-linecap="round"/></svg>
+            Not Taken
+          </h2>
+          @if (stats?.notTaken?.length === 0) {
+            <p style="color:#868e96; font-size:0.9rem;">All eligible students have taken the exam.</p>
+          } @else {
+            <div style="display:flex; flex-direction:column; gap:1rem; margin-top:1.5rem;">
+              @for (nt of stats?.notTaken; track nt._id) {
+                <div style="padding:1rem; border:1px solid #e9ecef; border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+                  <div>
+                    <div style="font-weight:600;">{{ nt.name }}</div>
+                    <div style="font-size:0.85rem; color:#868e96;">{{ nt.email }}</div>
+                  </div>
+                  <span style="font-size:0.75rem; font-weight:600; padding:0.25rem 0.6rem; background:#f1f3f5; color:#868e96; border-radius:4px;">Pending</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        
+      </div>
+    }
+
+  }
+</div>

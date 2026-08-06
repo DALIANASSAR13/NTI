@@ -1,7 +1,64 @@
-<div *ngIf="attempt">
-  <h2>Exam Result</h2>
-  <p>Exam: {{ getExamTitle() }}</p>
-  <p>Score: {{ attempt.score }} / {{ getQuestionsCount() }}</p>
-  <p>Status: {{ attempt.status }}</p>
-  <a routerLink="/student/dashboard">Back to Dashboard</a>
+<div class="result-container" *ngIf="attempt">
+  <div class="result-header">
+    <div class="header-content">
+      <h1 class="exam-title">{{ getExamTitle() }}</h1>
+      <span class="status-badge" [ngClass]="attempt.status">{{ attempt.status | titlecase }}</span>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-circle">
+        <svg viewBox="0 0 36 36" class="circular-chart">
+          <path class="circle-bg"
+            d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <path class="circle"
+            [attr.stroke-dasharray]="attempt.score + ', 100'"
+            d="M18 2.0845
+              a 15.9155 15.9155 0 0 1 0 31.831
+              a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <text x="18" y="20.35" class="percentage">{{ attempt.score }}%</text>
+        </svg>
+      </div>
+      <div class="score-details">
+        <p class="score-label">Final Score</p>
+        <p class="score-count">{{ getCorrectAnswersCount() }} out of {{ getQuestionsCount() }} correct</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="questions-review">
+    <h3 class="section-title">Review Answers</h3>
+    
+    <div class="question-card" *ngFor="let q of attempt.assignedQuestions; let i = index">
+      <div class="question-header">
+        <span class="question-number">Question {{ i + 1 }}</span>
+      </div>
+      <h4 class="question-text">{{ q.text }}</h4>
+      
+      <div class="options-list">
+        <div class="option-item" 
+             *ngFor="let opt of q.options"
+             [ngClass]="{'selected': opt === getSelectedOption(q._id)}">
+          <div class="option-radio">
+            <div class="radio-inner" *ngIf="opt === getSelectedOption(q._id)"></div>
+          </div>
+          <span class="option-text">{{ opt }}</span>
+          <span class="your-answer-badge" *ngIf="opt === getSelectedOption(q._id)">Your Answer</span>
+        </div>
+        
+        <div class="option-item un-answered" *ngIf="getSelectedOption(q._id) === 'No answer provided'">
+          <span class="option-text text-muted">You did not answer this question.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-actions">
+    <button class="btn-primary" routerLink="/student/dashboard">
+      <i class="fas fa-home"></i> Back to Dashboard
+    </button>
+  </div>
 </div>

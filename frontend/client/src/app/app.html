@@ -1,17 +1,1 @@
-<nav class="navbar" style="background: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; position: sticky; top: 0; z-index: 1000; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-  <div class="navbar__brand" style="display: flex; align-items: center; gap: 0.75rem; font-weight: 700; font-size: 1.25rem; color: #495057;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#339af0" stroke-width="2.5" style="width: 24px; height: 24px;">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    NTI Exams
-  </div>
-  <div class="navbar__links" style="display: flex; gap: 1.5rem;">
-    <a routerLink="/exams" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" style="text-decoration: none; color: #868e96; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#339af0'" onmouseout="this.style.color='#868e96'">Dashboard</a>
-    <a routerLink="/questions" routerLinkActive="active" style="text-decoration: none; color: #868e96; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#339af0'" onmouseout="this.style.color='#868e96'">Question Bank</a>
-    <a routerLink="/exams/new" routerLinkActive="active" style="text-decoration: none; color: #868e96; font-weight: 600; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='#339af0'" onmouseout="this.style.color='#868e96'">Create Exam</a>
-  </div>
-</nav>
-
-<main style="padding: 2rem;">
-  <router-outlet></router-outlet>
-</main>
+<router-outlet></router-outlet>

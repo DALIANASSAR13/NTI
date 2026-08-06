@@ -1,6 +1,47 @@
-<div *ngIf="exam">
-  <h2>{{ exam.title }}</h2>
-  <p>{{ exam.description }}</p>
-  <p>Duration: {{ exam.durationInMinutes }} minutes</p>
-  <button (click)="startExam()">Start Exam</button>
+<div class="pre-exam-wrapper">
+  <!-- Toast Notification -->
+  <div class="toast" *ngIf="toastMessage" [class.toast--success]="toastType === 'success'" [class.toast--error]="toastType === 'error'">
+    <div class="toast__icon">
+      <svg *ngIf="toastType === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngIf="toastType === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Error Overlay -->
+  <div class="full-overlay" *ngIf="fatalError">
+    <div class="full-overlay__content">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Notice</h3>
+      <p>{{ fatalError }}</p>
+      <button (click)="returnToDashboard()">Return to Dashboard</button>
+    </div>
+  </div>
+
+  <div class="container" *ngIf="exam">
+    <h2>{{ exam.title }}</h2>
+    <div class="card">
+      <p class="description">{{ exam.description }}</p>
+      <div class="meta-info">
+        <p><strong>Duration:</strong> {{ exam.durationInMinutes }} minutes</p>
+        <p *ngIf="exam.availableTo"><strong>Available Until:</strong> {{ exam.availableTo | date:'medium' }}</p>
+      </div>
+      
+      <div class="action-bar" style="margin-top: 20px;">
+        <button (click)="startExam()" [disabled]="loading">
+          {{ loading ? 'Starting...' : 'Start Exam' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -12,6 +12,10 @@ const validateStartAttempt = [
 ];
 
 const validateSubmitAttempt = [
+  (req, res, next) => {
+    console.log("Incoming submitAttempt body:", JSON.stringify(req.body, null, 2));
+    next();
+  },
   body('attemptId')
     .notEmpty()
     .withMessage('Attempt ID is required')

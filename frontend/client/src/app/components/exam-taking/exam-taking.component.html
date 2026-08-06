@@ -1,13 +1,72 @@
-<div *ngIf="attempt">
-  <div>Time Remaining: {{ time }}</div>
-  <div *ngFor="let aq of attempt.assignedQuestions; let i = index">
-    <h4>Question {{ i + 1 }}: {{ aq.question?.text || aq.question }}</h4>
-    <div *ngFor="let opt of aq.question?.options; let j = index">
-      <label>
-        <input type="radio" [name]="'q' + i" (change)="selectOption(i, j)" />
-        {{ opt }}
-      </label>
+<div class="exam-page-wrapper">
+  <!-- Toast Notification -->
+  <div class="toast" *ngIf="toastMessage" [class.toast--success]="toastType === 'success'" [class.toast--error]="toastType === 'error'">
+    <div class="toast__icon">
+      <svg *ngIf="toastType === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngIf="toastType === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <!-- Error Overlay -->
+  <div class="full-overlay" *ngIf="fatalError">
+    <div class="full-overlay__content">
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Notice</h3>
+      <p>{{ fatalError }}</p>
+      <button (click)="returnToDashboard()">Return to Dashboard</button>
     </div>
   </div>
-  <button (click)="submit()">Submit Exam</button>
+
+  <div class="exam-taking-container" *ngIf="attempt">
+    <div class="exam-header">
+    <h2>{{ attempt.examId?.title || 'Exam' }}</h2>
+    <div class="timer">Time Remaining: <span>{{ time }}</span></div>
+  </div>
+
+  <div class="questions-list">
+    <div class="question-card" *ngFor="let aq of attempt.assignedQuestions; let i = index">
+      <div class="question-card__header">
+        <div class="question-card__title">
+          <span class="question-card__number">{{ i + 1 }}</span>
+          <h3>Question Details</h3>
+        </div>
+      </div>
+
+      <div class="question-text">
+        {{ aq.text }}
+      </div>
+
+      <div class="options-section">
+        <div class="options-list">
+          <div class="option-row" *ngFor="let opt of aq.options; let j = index" [class.option-row--correct]="answers[i].selectedOption === opt" (click)="selectOption(i, opt)" style="cursor: pointer;">
+            <button type="button" class="radio-custom" [class.active]="answers[i].selectedOption === opt">
+              <svg *ngIf="answers[i].selectedOption === opt" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3">
+                <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="option-row__input-wrap">
+              <span class="option-row__label">{{ ['A','B','C','D','E','F'][j] || (j+1) }}</span>
+              <div class="option-text">{{ opt }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exam-footer">
+    <button class="btn-submit" (click)="submit()">Submit Exam</button>
+  </div>
+</div>
 </div>

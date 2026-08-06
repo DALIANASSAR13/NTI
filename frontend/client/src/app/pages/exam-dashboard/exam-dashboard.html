@@ -1,0 +1,81 @@
+<div class="dashboard">
+  <div class="dashboard__greeting">
+    {{ greeting }}
+  </div>
+  <header class="dashboard__header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+    <div class="dashboard__title-block">
+      <h1 class="dashboard__title">
+        <svg class="dashboard__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Exam Dashboard
+      </h1>
+      <p class="dashboard__subtitle">Manage your exams and view student participation.</p>
+    </div>
+    <button class="btn btn--primary" (click)="navigateToCreate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+      </svg>
+      Create Exam
+    </button>
+  </header>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="loading-spinner">
+        <div class="loading-spinner__ring"></div>
+        <div class="loading-spinner__ring"></div>
+      </div>
+      <p>Loading exams...</p>
+    </div>
+  } @else if (error) {
+    <div class="error-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 8v4m0 4h.01" stroke-linecap="round"/>
+      </svg>
+      <p>{{ error }}</p>
+      <button class="btn btn--outline" (click)="loadExams()">Try Again</button>
+    </div>
+  } @else if (exams.length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>No Exams Found</h2>
+      <p>You haven't created any exams yet.</p>
+    </div>
+  } @else {
+    <div class="exams-grid">
+      @for (exam of exams; track exam._id) {
+        <div class="exam-card" (click)="viewExam(exam._id!)">
+          <div class="exam-card__header">
+            <h3 class="exam-card__title">{{ exam.title }}</h3>
+            <span class="exam-card__level">Level {{ exam.level }}</span>
+          </div>
+          <div class="exam-card__body">
+            <p><strong>Specialization:</strong> {{ exam.specialization }}</p>
+            <p><strong>Duration:</strong> {{ exam.durationInMinutes }} mins</p>
+            <p><strong>Questions:</strong> {{ exam.questionPool?.length }} pool ({{ exam.questionsToAsk }} asked)</p>
+            <p><strong>Available:</strong> {{ exam.availableFrom | date:'short' }} to {{ exam.availableTo | date:'short' }}</p>
+          </div>
+          <div class="exam-card__footer" style="display:flex; gap:0.5rem; margin-top:1rem;">
+            <button class="btn btn--outline card-action-btn" style="flex:1; justify-content:center; padding: 0.6rem; font-size:0.9rem;" (click)="viewExam(exam._id!)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:0.4rem;display:inline-block;vertical-align:text-bottom;"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Manage
+            </button>
+            <button class="btn btn--outline card-action-btn" style="flex:1; justify-content:center; padding: 0.6rem; font-size:0.9rem;" (click)="useAsTemplate(exam._id!, $event)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:0.4rem;display:inline-block;vertical-align:text-bottom;"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Clone
+            </button>
+            <button class="icon-btn icon-btn--danger-ghost card-delete-btn" style="width:40px; height:40px; border:1px solid #ffc9c9; background:white; transition:all 0.2s;" (click)="deleteExam(exam._id!, $event)" title="Delete Exam" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='white'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

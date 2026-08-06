@@ -1,0 +1,253 @@
+<!-- Toast Notification -->
+@if (toastMessage) {
+  <div class="toast" [class.toast--success]="toastType === 'success'" [class.toast--error]="toastType === 'error'">
+    <div class="toast__icon">
+      @if (toastType === 'success') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+        </svg>
+      }
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+}
+
+<!-- Dashboard Header -->
+<div class="dashboard">
+  <header class="dashboard__header">
+    <div class="dashboard__title-block">
+      <h1 class="dashboard__title">
+        <svg class="dashboard__title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M9 14l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Question Bank
+      </h1>
+      <p class="dashboard__subtitle">{{ greeting }}</p>
+    </div>
+    <button class="btn btn--primary btn--glow" (click)="navigateToCreate()" id="create-question-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+      </svg>
+      Add Questions
+    </button>
+  </header>
+
+  <!-- Stats & Search Bar -->
+  <div class="dashboard__toolbar">
+    <div class="stats-group">
+      <div class="stat-chip">
+        <span class="stat-chip__value">{{ totalQuestions }}</span>
+        <span class="stat-chip__label">Total</span>
+      </div>
+      @if (searchTerm) {
+        <div class="stat-chip stat-chip--filtered">
+          <span class="stat-chip__value">{{ shownQuestions }}</span>
+          <span class="stat-chip__label">Showing</span>
+        </div>
+      }
+    </div>
+    <div class="search-box" id="search-box">
+      <svg class="search-box__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+      </svg>
+      <input
+        type="text"
+        class="search-box__input"
+        placeholder="Search by question text or options..."
+        [ngModel]="searchTerm"
+        (ngModelChange)="onSearch($event)"
+        id="search-input"
+      />
+      @if (searchTerm) {
+        <button class="search-box__clear" (click)="onSearch('')" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="loading-spinner">
+        <div class="loading-spinner__ring"></div>
+        <div class="loading-spinner__ring"></div>
+        <div class="loading-spinner__ring"></div>
+      </div>
+      <p>Loading your questions...</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (errorMessage && !isLoading) {
+    <div class="error-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <p>{{ errorMessage }}</p>
+      <button class="btn btn--outline" (click)="loadQuestions()">Try Again</button>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading && !errorMessage && totalQuestions === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke-linecap="round"/>
+          <rect x="9" y="3" width="6" height="4" rx="1"/>
+          <path d="M12 11v6M9 14h6" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h2>No questions yet</h2>
+      <p>Start building your question bank by adding your first question.</p>
+      <button class="btn btn--primary" (click)="navigateToCreate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+        </svg>
+        Create Your First Question
+      </button>
+    </div>
+  }
+
+  <!-- No Search Results -->
+  @if (!isLoading && !errorMessage && totalQuestions > 0 && shownQuestions === 0) {
+    <div class="empty-state empty-state--search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+        <path d="M8 11h6" stroke-linecap="round"/>
+      </svg>
+      <h2>No results found</h2>
+      <p>No questions match "<strong>{{ searchTerm }}</strong>". Try a different search term.</p>
+    </div>
+  }
+
+  <!-- Questions Grid -->
+  @if (!isLoading && !errorMessage && shownQuestions > 0) {
+    <div class="questions-grid">
+      @for (question of filteredQuestions; track question._id; let i = $index) {
+        <article class="question-card" id="question-card-{{ question._id }}">
+          <div class="question-card__header">
+            <span class="question-card__number">#{{ i + 1 }}</span>
+            <div class="question-card__actions">
+              <button
+                class="icon-btn icon-btn--edit"
+                (click)="navigateToEdit(question._id)"
+                title="Edit question"
+                id="edit-btn-{{ question._id }}"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button
+                class="icon-btn icon-btn--delete"
+                (click)="openDeleteModal(question)"
+                title="Delete question"
+                id="delete-btn-{{ question._id }}"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                  <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 11v6M14 11v6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <p class="question-card__text">{{ question.text }}</p>
+          <div class="question-card__options">
+            @for (option of question.options; track option; let j = $index) {
+              <div
+                class="option-pill"
+                [class.option-pill--correct]="option === question.correctAnswer"
+              >
+                <span class="option-pill__label">{{ optionLabels[j] }}</span>
+                <span class="option-pill__text">{{ option }}</span>
+                @if (option === question.correctAnswer) {
+                  <svg class="option-pill__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                }
+              </div>
+            }
+          </div>
+          <div class="question-card__footer">
+            <span class="question-card__date">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="4" width="18" height="18" rx="2"/>
+                <path d="M16 2v4M8 2v4M3 10h18"/>
+              </svg>
+              {{ question.createdAt | date:'medium' }}
+            </span>
+            <span class="question-card__option-count">{{ question.options.length }} options</span>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</div>
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteModal) {
+  <div class="modal-overlay" (click)="closeDeleteModal()">
+    <div class="modal" (click)="$event.stopPropagation()" id="delete-modal">
+      <div class="modal__icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="modal__title">Delete Question</h2>
+      <p class="modal__text">
+        Are you sure you want to delete this question?
+      </p>
+      @if (questionToDelete) {
+        <div class="modal__preview">
+          "{{ questionToDelete!.text }}"
+        </div>
+      }
+      <p class="modal__warning">This action cannot be undone.</p>
+
+      @if (deleteError) {
+        <div class="modal__error">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+          </svg>
+          {{ deleteError }}
+        </div>
+      }
+
+      <div class="modal__actions">
+        <button class="btn btn--ghost" (click)="closeDeleteModal()" [disabled]="isDeleting" id="cancel-delete-btn">
+          Cancel
+        </button>
+        <button
+          class="btn btn--danger"
+          (click)="confirmDelete()"
+          [disabled]="isDeleting"
+          id="confirm-delete-btn"
+        >
+          @if (isDeleting) {
+            <span class="btn-spinner"></span>
+            Deleting...
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Delete
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

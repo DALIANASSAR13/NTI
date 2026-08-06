@@ -15,6 +15,9 @@ export class PreExamComponent implements OnInit {
   exam: Exam | null = null;
   loading = false;
   error = '';
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
+  fatalError = '';
 
   constructor(
     private examState: ExamStateService,
@@ -27,12 +30,36 @@ export class PreExamComponent implements OnInit {
     if (!this.exam) this.router.navigate(['/student/dashboard']);
   }
 
+  showToast(message: string, type: 'success' | 'error' = 'success'): void {
+    this.toastMessage = message;
+    this.toastType = type;
+    setTimeout(() => {
+      this.toastMessage = '';
+    }, 4000);
+  }
+
+  returnToDashboard(): void {
+    this.router.navigate(['/student/dashboard']);
+  }
+
   startExam(): void {
     if (!this.exam) return;
     this.loading = true;
     this.attemptService.startAttempt(this.exam._id).subscribe({
-      next: (attempt: Attempt) => { this.loading = false; this.router.navigate(['/student/exam', attempt._id]); },
-      error: (err: any) => { this.error = 'Failed to start exam.'; this.loading = false; }
+      next: (res: any) => { 
+        this.loading = false; 
+        this.router.navigate(['/student/exam', res.data.attemptId]); 
+      },
+      error: (err: any) => { 
+        this.loading = false;
+        const msg = err.error?.message || 'Failed to start exam. Please check your connection.';
+        
+        if (err.status >= 400 && err.status < 500) {
+           this.fatalError = msg;
+        } else {
+           this.showToast(msg, 'error');
+        }
+      }
     });
   }
 }

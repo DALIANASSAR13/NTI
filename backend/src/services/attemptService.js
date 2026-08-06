@@ -247,12 +247,6 @@ const getAttemptResult = async (studentId, attemptId) => {
     throw new AppError('Attempt not found or access denied.', 404);
   }
 
-  if (attempt.status !== 'completed') {
-    throw new AppError(
-      'Cannot view results for an in-progress attempt.',
-      400
-    );
-  }
 
   // Strip correctAnswer from assigned questions
   const result = attempt.toObject();

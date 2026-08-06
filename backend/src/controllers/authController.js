@@ -47,4 +47,21 @@ const login = async (req, res) => {
   });
 };
 
-module.exports = { register, login };
+const getSpecializations = async (req, res) => {
+  const User = require('../models/User');
+  try {
+    const specializations = await User.distinct('specialization', { role: 'teacher' });
+    res.status(200).json({ success: true, data: specializations });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+const getMe = async (req, res) => {
+  res.status(200).json({
+    success: true,
+    data: req.user,
+  });
+};
+
+module.exports = { register, login, getSpecializations, getMe };

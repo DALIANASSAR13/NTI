@@ -1,11 +1,82 @@
-<div class="container">
-  <h2>Available Exams</h2>
-  <div *ngIf="exams.length === 0" class="text-center text-muted">No exams available.</div>
-  <div *ngFor="let exam of exams" class="card">
-    <h3>{{ exam.title }}</h3>
-    <p>{{ exam.description }}</p>
-    <p><strong>Level:</strong> {{ exam.level }} | <strong>Specialization:</strong> {{ exam.specialization }}</p>
-    <p><strong>Duration:</strong> {{ exam.durationInMinutes }} min</p>
-    <button class="btn btn-primary" (click)="viewExam(exam)">View Details</button>
+<div class="dashboard-container">
+  <!-- Toast Notification -->
+  <div class="toast" *ngIf="toastMessage" [class.toast--success]="toastType === 'success'" [class.toast--error]="toastType === 'error'">
+    <div class="toast__icon">
+      <svg *ngIf="toastType === 'success'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg *ngIf="toastType === 'error'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+
+  <div class="dashboard-header">
+    <h2>Available Exams</h2>
+    <p class="subtitle">Select an exam to start your attempt.</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading exams...</p>
+  </div>
+  
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && exams.length === 0" class="no-exams">
+    <div class="empty-state">
+      <i class="fas fa-clipboard-list empty-icon"></i>
+      <h3>No Exams Available</h3>
+      <p>There are currently no exams assigned to you.</p>
+    </div>
+  </div>
+
+  <div class="exams-grid" *ngIf="!loading && exams.length > 0">
+    <div *ngFor="let exam of exams" class="exam-card" [ngClass]="{'disabled-card': isExamTaken(exam._id)}">
+      
+      <div class="card-status-badge" *ngIf="isExamTaken(exam._id)">
+        <i class="fas fa-check-circle"></i> Completed
+      </div>
+
+      <div class="exam-card-header">
+        <h3 class="exam-title">{{ exam.title }}</h3>
+        <span class="level-badge level-{{ exam.level }}">Lvl {{ exam.level }}</span>
+      </div>
+      
+      <p class="exam-desc">{{ exam.description || 'No description provided.' }}</p>
+      
+      <div class="exam-meta">
+        <div class="meta-item">
+          <i class="fas fa-layer-group"></i>
+          <span>{{ exam.specialization }}</span>
+        </div>
+        <div class="meta-item">
+          <i class="fas fa-clock"></i>
+          <span>{{ exam.durationInMinutes }} min</span>
+        </div>
+      </div>
+      
+      <div class="exam-availability" *ngIf="exam.availableTo">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Until {{ exam.availableTo | date:'mediumDate' }}</span>
+      </div>
+
+      <div class="card-footer">
+        <button class="btn-start" 
+                *ngIf="!isExamTaken(exam._id)" 
+                (click)="viewExam(exam)">
+          <i class="fas fa-play"></i> {{ isExamInProgress(exam._id) ? 'Resume Exam' : 'Start Exam' }}
+        </button>
+        <button class="btn-disabled" 
+                *ngIf="isExamTaken(exam._id)" 
+                disabled>
+          <i class="fas fa-lock"></i> Exam Taken
+        </button>
+      </div>
+    </div>
   </div>
 </div>

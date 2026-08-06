@@ -1,0 +1,227 @@
+<!-- Toast Notification -->
+@if (toastMessage) {
+  <div class="toast" [class.toast--success]="toastType === 'success'" [class.toast--error]="toastType === 'error'">
+    <div class="toast__icon">
+      @if (toastType === 'success') {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      } @else {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M15 9l-6 6M9 9l6 6" stroke-linecap="round"/>
+        </svg>
+      }
+    </div>
+    <span>{{ toastMessage }}</span>
+  </div>
+}
+
+<div class="form-page">
+  <header class="form-header">
+    <div class="form-header__left">
+      <button class="icon-btn icon-btn--back" (click)="goBack()" title="Back to Dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="form-header__title-block">
+        <h1 class="form-header__title">{{ pageTitle }}</h1>
+        <p class="form-header__subtitle">
+          @if (isEditMode) {
+            Update the question details and options.
+          } @else {
+            Create one or more questions to add to your question bank.
+          }
+        </p>
+      </div>
+    </div>
+  </header>
+
+  @if (isBatchSubmitting && !isEditMode) {
+    <div class="batch-progress">
+      <div class="batch-progress__text">
+        <span>Saving questions...</span>
+        <span>{{ batchDone }} / {{ batchTotal }}</span>
+      </div>
+      <div class="batch-progress__bar-wrap">
+        <div class="batch-progress__bar" [style.width.%]="(batchDone / batchTotal) * 100"></div>
+      </div>
+      @if (batchErrors.length > 0) {
+        <div class="batch-progress__errors">
+          <p>Some questions failed to save:</p>
+          <ul>
+            @for (err of batchErrors; track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+  }
+
+  @if (isLoadingEdit) {
+    <div class="loading-state">
+      <div class="loading-spinner">
+        <div class="loading-spinner__ring"></div>
+        <div class="loading-spinner__ring"></div>
+      </div>
+      <p>Loading question data...</p>
+    </div>
+  } @else {
+    <div class="questions-list">
+      @for (q of questions; track q.id; let i = $index) {
+        <div class="question-block" [class.question-block--error]="!!q.error" [class.question-block--success]="q.isSubmitted">
+          
+          <div class="question-block__header">
+            <div class="question-block__title">
+              <span class="question-block__number">{{ i + 1 }}</span>
+              <h3>Question Details</h3>
+            </div>
+            
+            <div class="question-block__actions">
+              @if (!isEditMode) {
+                <button class="icon-btn icon-btn--ghost" (click)="duplicateQuestion(q)" title="Duplicate Question">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                  </svg>
+                </button>
+                @if (questions.length > 1) {
+                  <button class="icon-btn icon-btn--danger" (click)="removeQuestion(q.id)" title="Remove Question">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                      <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+          @if (q.error) {
+            <div class="question-block__error-banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v4m0 4h.01" stroke-linecap="round"/>
+              </svg>
+              {{ q.error }}
+            </div>
+          }
+
+          <div class="form-group">
+            <label class="form-label">Question Text <span class="required">*</span></label>
+            <textarea 
+              class="form-control form-control--textarea" 
+              placeholder="Enter your question here..."
+              [ngModel]="q.text"
+              (ngModelChange)="q.text = $event; q.error = ''"
+              rows="3"
+            ></textarea>
+          </div>
+
+          <div class="options-section">
+            <div class="options-section__header">
+              <label class="form-label">Answer Options <span class="required">*</span> (Min 2, Max 6)</label>
+              <span class="options-section__hint">Click the circle next to an option to mark it as the correct answer.</span>
+            </div>
+            
+            <div class="options-list">
+              @for (opt of q.options; track $index; let j = $index) {
+                <div class="option-row" [class.option-row--correct]="q.correctAnswer === opt && opt !== ''">
+                  <button 
+                    type="button"
+                    class="option-row__radio" 
+                    (click)="opt ? setCorrectAnswer(q.id, opt) : null" 
+                    [class.disabled]="!opt"
+                    title="Mark as correct answer"
+                  >
+                    <div class="radio-custom" [class.active]="q.correctAnswer === opt && opt !== ''">
+                      @if (q.correctAnswer === opt && opt !== '') {
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="option-pill__check">
+                          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      }
+                    </div>
+                  </button>
+                  
+                  <div class="option-row__input-wrap">
+                    <span class="option-row__label">{{ getOptionLabel(j) }}</span>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      placeholder="Option text..."
+                      [ngModel]="opt"
+                      (ngModelChange)="updateOptionValue(q.id, j, $event); q.error = ''"
+                    />
+                  </div>
+
+                  <button 
+                    class="icon-btn icon-btn--danger-ghost option-row__remove" 
+                    [class.invisible]="q.options.length <= 2"
+                    (click)="removeOption(q.id, j)"
+                    title="Remove option"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                      <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (q.options.length < 6) {
+              <button class="btn-text" (click)="addOption(q.id)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                </svg>
+                Add Option
+              </button>
+            }
+          </div>
+
+          @if (q.isSubmitting || q.isSubmitted) {
+            <div class="question-block__overlay">
+              @if (q.isSubmitting) {
+                <div class="loading-spinner">
+                  <div class="loading-spinner__ring"></div>
+                  <div class="loading-spinner__ring"></div>
+                </div>
+                <p>Saving...</p>
+              } @else if (q.isSubmitted) {
+                <div class="success-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <p>Saved successfully</p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Actions at the bottom -->
+    <div class="form-actions-bottom">
+      @if (!isEditMode) {
+        <button class="btn btn--outline" (click)="addQuestion()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+          </svg>
+          Add Another Question
+        </button>
+      }
+      <button class="btn btn--primary btn--glow" (click)="submitAll()" [disabled]="isBatchSubmitting">
+        @if (isBatchSubmitting) {
+          <span class="btn-spinner"></span>
+          Submitting...
+        } @else {
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Save {{ isEditMode ? 'Changes' : 'All Questions' }}
+        }
+      </button>
+    </div>
+  }
+</div>

@@ -1,0 +1,49 @@
+<div class="user-info-container">
+  <div class="card" *ngIf="user; else noUser">
+    <div class="card-header">
+      <div class="avatar-large">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <h2>{{ user.name }}</h2>
+      <p class="subtitle">{{ user.email || 'No email provided' }}</p>
+    </div>
+
+    <div class="card-content">
+      <div class="info-group">
+        <span class="label">Name</span>
+        <span class="value">{{ user.name }}</span>
+      </div>
+      
+      <div class="info-group" *ngIf="user.email">
+        <span class="label">Email</span>
+        <span class="value">{{ user.email }}</span>
+      </div>
+
+      <div class="info-group">
+        <span class="label">Role</span>
+        <span class="value role-badge" [ngClass]="user.role">{{ user.role | titlecase }}</span>
+      </div>
+
+      <div class="info-group" *ngIf="user.specialization">
+        <span class="label">Specialization</span>
+        <span class="value">{{ user.specialization }}</span>
+      </div>
+
+      <div class="info-group" *ngIf="user.level">
+        <span class="label">Level</span>
+        <span class="value">Level {{ user.level }}</span>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noUser>
+    <div class="card empty-state">
+      <div class="card-content">
+        <p>Loading user information...</p>
+      </div>
+    </div>
+  </ng-template>
+</div>

@@ -26,6 +26,6 @@ export class AttemptHistoryComponent implements OnInit {
   }
 
   getExamTitle(att: Attempt): string {
-    return (att.exam as any)?.title || 'Unknown';
+    return (att.examId as any)?.title || 'Unknown';
   }
 }

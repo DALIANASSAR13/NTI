@@ -1,0 +1,65 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="brand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#339af0" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>Create Account</h1>
+      </div>
+      <p>Join NTI Exams today.</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="auth-form">
+      <div *ngIf="error" class="error-alert">{{ error }}</div>
+      
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="name" [(ngModel)]="userData.name" required placeholder="John Doe" />
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" [(ngModel)]="userData.email" required placeholder="Enter your email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" [(ngModel)]="userData.password" required minlength="6" placeholder="At least 6 characters" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group half">
+          <label for="role">Role</label>
+          <select id="role" name="role" [(ngModel)]="userData.role" required>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+        </div>
+        <div class="form-group half">
+          <label for="level">Level (1-4)</label>
+          <input type="number" id="level" name="level" [(ngModel)]="userData.level" required min="1" max="4" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="specialization">Specialization</label>
+        
+        <select *ngIf="userData.role === 'student'" id="specialization" name="specialization" [(ngModel)]="userData.specialization" required>
+          <option value="" disabled>Select Specialization</option>
+          <option *ngFor="let spec of availableSpecializations" [value]="spec">{{ spec }}</option>
+        </select>
+
+        <input *ngIf="userData.role === 'teacher'" type="text" id="specialization" name="specialization" [(ngModel)]="userData.specialization" required placeholder="e.g. Computer Science" />
+      </div>
+
+      <button type="submit" [disabled]="!registerForm.valid || loading" class="btn-primary">
+        {{ loading ? 'Creating Account...' : 'Sign Up' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account? <a routerLink="/login">Sign in</a>
+    </div>
+  </div>
+</div>
