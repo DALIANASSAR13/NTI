@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Exam {
   _id?: string;
@@ -32,7 +33,7 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class ExamService {
-  private apiUrl = 'http://localhost:5000/api/exams';
+  private apiUrl = environment.apiUrl + '/exams';
   // Using the hardcoded token
   private token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNmE4MmJkM2ZhMzJkOGY3NmQxYjE3YiIsInJvbGUiOiJ0ZWFjaGVyIiwic3BlY2lhbGl6YXRpb24iOiJTY2llbmNlIiwibGV2ZWwiOjEsImlhdCI6MTc4NTk0ODA2MywiZXhwIjoxNzg2MDM0NDYzfQ.BAgyNI08MAcWXBYf5t-iCaf8uFo80pdjUBW2G9vOBCk';
 

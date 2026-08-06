@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Exam {
   _id: string;
@@ -37,7 +38,7 @@ export interface Attempt {
 
 @Injectable({ providedIn: 'root' })
 export class AttemptService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = environment.apiUrl;
   private token = '';
 
   constructor(private http: HttpClient) {}

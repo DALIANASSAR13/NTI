@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface Question {
   _id: string;
@@ -30,7 +31,7 @@ interface ApiResponse<T> {
   providedIn: 'root',
 })
 export class QuestionService {
-  private readonly apiUrl = 'http://localhost:5000/api/questions';
+  private readonly apiUrl = environment.apiUrl + '/questions';
   private readonly token =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNmE4MmJkM2ZhMzJkOGY3NmQxYjE3YiIsInJvbGUiOiJ0ZWFjaGVyIiwic3BlY2lhbGl6YXRpb24iOiJTY2llbmNlIiwibGV2ZWwiOjEsImlhdCI6MTc4NTk0ODA2MywiZXhwIjoxNzg2MDM0NDYzfQ.BAgyNI08MAcWXBYf5t-iCaf8uFo80pdjUBW2G9vOBCk';
 

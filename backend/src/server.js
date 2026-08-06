@@ -55,6 +55,8 @@ const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const startServer = async () => {
+  if (process.env.VERCEL === '1') return;
+  
   await connectDB();
 
   app.listen(PORT, (err) => {
@@ -67,3 +69,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+module.exports = app;
