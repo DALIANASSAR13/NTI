@@ -19,7 +19,7 @@ const create = async (teacherId, data) => {
  *  returns  Array of question documents.
 */
 const getAll = async (teacherId) => {
-  return Question.find({ teacherId }).sort({ createdAt: -1 });
+  return Question.find({ teacherId }).sort({ createdAt: -1 }).lean();
 };
 
 /*
@@ -30,7 +30,7 @@ const getById = async (teacherId, questionId) => {
   const question = await Question.findOne({
     _id: questionId,
     teacherId,
-  });
+  }).lean();
 
   if (!question) {
     throw new AppError('Question not found or access denied.', 404);

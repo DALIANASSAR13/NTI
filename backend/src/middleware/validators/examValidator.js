@@ -79,4 +79,44 @@ const validateExamId = [
   handleValidationErrors,
 ];
 
-module.exports = { validateCreateExam, validateExamId };
+const validateUpdateExam = [
+  param('id').isMongoId().withMessage('Invalid exam ID'),
+
+  body('availableFrom')
+    .optional()
+    .isISO8601()
+    .withMessage('Start date must be a valid ISO 8601 date')
+    .toDate(),
+
+  body('availableTo')
+    .optional()
+    .isISO8601()
+    .withMessage('End date must be a valid ISO 8601 date')
+    .toDate(),
+
+  body('durationInMinutes')
+    .optional()
+    .isInt({ min: 1, max: 300 })
+    .withMessage('Duration must be between 1 and 300 minutes')
+    .toInt(),
+
+  body('questionPool')
+    .optional()
+    .isArray({ min: 1 })
+    .withMessage('Question pool must be a non-empty array'),
+
+  body('questionPool.*')
+    .optional()
+    .isMongoId()
+    .withMessage('Each question pool entry must be a valid ID'),
+
+  body('questionsToAsk')
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage('Must ask at least 1 question')
+    .toInt(),
+
+  handleValidationErrors,
+];
+
+module.exports = { validateCreateExam, validateExamId, validateUpdateExam };

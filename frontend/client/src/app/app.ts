@@ -1,20 +1,16 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AttemptService } from './services/attempt.service';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, RouterLink],
-  template: `
-    <nav>
-      <a routerLink="/student/dashboard">Exams</a>
-      <a routerLink="/student/history">History</a>
-    </nav>
-    <router-outlet></router-outlet>
-  `
+  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  templateUrl: './app.html',
+  styleUrl: './app.scss'
 })
 export class App implements OnInit {
+  protected readonly title = 'client';
+
   constructor(private attemptService: AttemptService) {}
 
   ngOnInit(): void {

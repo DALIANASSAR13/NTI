@@ -60,4 +60,45 @@ const getById = async (req, res) => {
   });
 };
 
-module.exports = { create, list, getById };
+/**
+ *   Update exam details (schedule and question pool)
+ *   PATCH /api/exams/:id
+ *   (Teacher only)
+ */
+const update = async (req, res) => {
+  const exam = await examService.update(req.params.id, req.user.id, req.body);
+
+  res.status(200).json({
+    success: true,
+    message: 'Exam updated successfully',
+    data: exam,
+  });
+};
+
+/**
+ *   Get exam stats
+ *   GET /api/exams/:id/stats
+ *   (Teacher only)
+ */
+const getStats = async (req, res) => {
+  const stats = await examService.getStats(req.params.id, req.user.id);
+  res.status(200).json({
+    success: true,
+    data: stats,
+  });
+};
+
+/**
+ *   Delete exam
+ *   DELETE /api/exams/:id
+ *   (Teacher only)
+ */
+const deleteExam = async (req, res) => {
+  await examService.deleteExam(req.params.id, req.user.id);
+  res.status(200).json({
+    success: true,
+    message: 'Exam deleted successfully'
+  });
+};
+
+module.exports = { create, list, getById, update, getStats, deleteExam };
