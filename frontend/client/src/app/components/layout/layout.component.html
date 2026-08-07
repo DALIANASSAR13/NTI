@@ -1,4 +1,7 @@
 <div class="app-layout">
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" [class.active]="isSidebarOpen" (click)="toggleSidebar()"></div>
+
   <!-- Side Navigation -->
   <aside class="sidebar" [class.collapsed]="!isSidebarOpen">
     <div class="sidebar-header">
